@@ -1,0 +1,10 @@
+{
+  "name": "opnet-providers",
+  "version": "0.1.0",
+  "description": "OP_NET provider classes for testing and live systems",
+  "main": "lib/index.js",
+  "repository": "https://github.com/youngslohmlife/opnet-providers",
+  "author": "FREEJEFFREY",
+  "license": "MIT",
+  "private": false
+}

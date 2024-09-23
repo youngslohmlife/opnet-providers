@@ -1,0 +1,70 @@
+import { ABICoder } from "@btc-vision/bsi-binary";
+import { Blockchain } from "opnet-unit-test/src/blockchain/Blockchain";
+import { CallResponse } from "opnet-unit-test/src/opnet/modules/ContractRunner";
+
+const coder = new ABICoder();
+
+export interface CallOptions {
+  sender: string;
+  from: string;
+}
+
+export interface IProviderOrSigner {
+  readView(selector: string, opts: CallOptions): ArrayBuffer;
+  readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): ArrayBuffer;
+}
+
+export class BlockchainProvider {
+  public blockchain: typeof Blockchain;
+  public address: string;
+  constructor(address: string, blockchain: typeof Blockchain) {
+    this.address = address;
+    this.blockchain = blockchain;
+  }
+  async readView(selector: string, opts?: CallOptions): ArrayBuffer {
+    return await this.blockchain.readView(selector, this.address, this.address);
+  },
+  async readMethod(selector: string, data: ArrayBuffer, opts?: CallOptions): ArrayBuffer {
+    return await this.blockchain.readMethod(selector, Buffer.from(Array.from(Uint8Array.from(data))), opts && opts.sender || this.address, opts && opts.from || this.address);
+  }
+}
+
+export interface IFragment {
+  name: string;
+  parameters: Array<string>;
+  returnType: string;
+  selector: string;
+}
+
+const ln = (v) => ((console.log(v)), v);
+
+export class Contract {
+  public target: string;
+  public fns: Array<Fragment>,
+  public provider: IProviderOrSigner;
+  static toFragment(s: string): IFragment {
+    const firstParen = s.indexOf('(');
+    const name = s.substr(0, firstParen);
+    const params = s.substr(firstParen + 1, s.lastIndexOf(')') - firstParen - 1).split(',').map((v) => v.trim());
+    return ln({
+      name,
+      selector: coder.encodeSelector(name),
+      parameters: params
+    });
+  }
+  static toFragments(fns: Array<string>): Array<IFragment> {
+    return fns.map((v) => Contract.toFragment(v));
+  }
+  constructor(address: string, fns: Array<string>, provider: IProviderOrSigner) {
+    this.provider = provider;
+    this.fns = Contract.toFragments(fns);
+    this.target = address;
+    this.fns.forEach((v: IFragment) => {
+      this[v.name] = async (...args) => {
+        const first = args.slice(0, typeof args[args.length - 1] === 'object' && !Array.isArray(args[args.length - 1]) ? args.length - 1: args.length);
+	const last = args[args.length - 1];
+	
+      };
+    })
+  }
+}
