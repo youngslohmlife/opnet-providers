@@ -1,8 +1,7 @@
-import { Blockchain } from "opnet-unit-test/src/blockchain/Blockchain";
-import { CallResponse } from "opnet-unit-test/src/opnet/modules/ContractRunner";
+import { Blockchain } from "opnet-unit-test/build/blockchain/Blockchain.js";
 export type BlockchainBase = typeof Blockchain;
 export type ContractParameter = string | bigint | number;
-export type ContractMethod = (...args: (ContractParameter | CallOptions)[]) => CallResponse;
+export type ContractMethod = (...args: (ContractParameter | CallOptions)[]) => any;
 export interface CallOptions {
     sender: string;
     from: string;

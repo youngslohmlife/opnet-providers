@@ -1,6 +1,6 @@
 import { BinaryWriter, ABICoder } from "@btc-vision/bsi-binary";
-import { Blockchain } from "opnet-unit-test/src/blockchain/Blockchain";
-import { CallResponse } from "opnet-unit-test/src/opnet/modules/ContractRunner";
+import { Blockchain } from "opnet-unit-test/build/blockchain/Blockchain.js";
+import { CallResponse } from "opnet-unit-test/build/opnet/modules/ContractRuntime.js";
 
 export type BlockchainBase = typeof Blockchain;
 
@@ -8,7 +8,7 @@ const coder = new ABICoder();
 
 export type ContractParameter = string | bigint | number;
 
-export type ContractMethod = (...args: (ContractParameter | CallOptions)[]) => CallResponse;
+export type ContractMethod = (...args: (ContractParameter | CallOptions)[]) => any;
 
 export interface CallOptions {
   sender: string;
@@ -27,7 +27,7 @@ export interface ContractImpl {
 }
 
 export function getContract(blockchain: BlockchainBase, who: string): ContractImpl {
-  return blockchain.getContract(blockchain, who) as ContractImpl;
+  return blockchain.getContract(who) as unknown as ContractImpl;
 }
 
 export class BlockchainProvider {

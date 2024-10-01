@@ -1,7 +1,7 @@
 import { BinaryWriter, ABICoder } from "@btc-vision/bsi-binary";
 const coder = new ABICoder();
 export function getContract(blockchain, who) {
-    return blockchain.getContract(blockchain, who);
+    return blockchain.getContract(who);
 }
 export class BlockchainProvider {
     blockchain;
