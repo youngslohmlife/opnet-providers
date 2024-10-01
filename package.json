@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "OP_NET provider classes for testing and live systems",
   "main": "lib/index.js",
+  "type": "module",
   "repository": "https://github.com/youngslohmlife/opnet-providers",
   "scripts": {
     "build": "tsc"
@@ -15,6 +16,6 @@
   },
   "dependencies": {
     "opnet-unit-test": "https://github.com/youngslohmlife/opnet-unit-test",
-    "wasmer": "https://github.com/youngslohmlife/opnet-unit-test"
+    "wasmer": "https://github.com/btc-vision/opnet-unit-test"
   }
 }

@@ -1,22 +1,33 @@
-import { BytesWriter, ABICoder } from "@btc-vision/bsi-binary";
+import { BinaryWriter, ABICoder } from "@btc-vision/bsi-binary";
 import { Blockchain } from "opnet-unit-test/src/blockchain/Blockchain";
 import { CallResponse } from "opnet-unit-test/src/opnet/modules/ContractRunner";
 
+export type BlockchainBase = typeof Blockchain;
 
 const coder = new ABICoder();
 
 export type ContractParameter = string | bigint | number;
 
-export type ContractMethod = (...args: ContractParameter[], options: CallOptions?) => CallResponse;
+export type ContractMethod = (...args: (ContractParameter | CallOptions)[]) => CallResponse;
 
 export interface CallOptions {
   sender: string;
   from: string;
+  to: string;
 }
 
 export interface IProviderOrSigner {
   readView(selector: string, opts: CallOptions): ArrayBuffer;
   readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): ArrayBuffer;
+}
+
+export interface ContractImpl {
+  readMethod(selector: string, calldata: Buffer, sender: string, from: string): Promise<ArrayBuffer>;
+  readView(selector: string, sender: string, from: string): Promise<ArrayBuffer>;
+}
+
+export function getContract(blockchain: BlockchainBase, who: string): ContractImpl {
+  return blockchain.getContract(blockchain, who) as ContractImpl;
 }
 
 export class BlockchainProvider {
@@ -26,11 +37,11 @@ export class BlockchainProvider {
     this.address = address;
     this.blockchain = blockchain;
   }
-  async readView(selector: string, opts?: CallOptions): ArrayBuffer {
-    return await this.blockchain.readView(selector, this.address, this.address);
+  async readView(selector: string, opts: CallOptions): Promise<ArrayBuffer> {
+    return await getContract(this.blockchain, opts.to).readView(selector, this.address, this.address);
   }
-  async readMethod(selector: string, data: ArrayBuffer, opts?: CallOptions): ArrayBuffer {
-    return await this.blockchain.readMethod(selector, Buffer.from(Array.from(new Uint8Array(data))), opts && opts.sender || this.address, opts && opts.from || this.address);
+  async readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer> {
+    return await getContract(this.blockchain, opts.to).readMethod(selector, Buffer.from(Array.from(new Uint8Array(data))), opts && opts.sender || this.address, opts && opts.from || this.address);
   }
 }
 
@@ -73,7 +84,8 @@ export class Contract {
       this[v.name] = async (...args) => {
         const first = args.slice(0, typeof args[args.length - 1] === 'object' && !Array.isArray(args[args.length - 1]) ? args.length - 1: args.length);
 	const last = args.length === first.length ? {} : args[args.length - 1];
-	const writer = new BytesWriter();
+	last.to = this.target;
+	const writer = new BinaryWriter();
 	v.parameters.forEach((v, i) => {
           switch (v) {
             case 'Address':
@@ -88,7 +100,8 @@ export class Contract {
       };
       this.callStatic[v.name] = async (...args) => {
         const first = args.slice(0, typeof args[args.length - 1] === 'object' && !Array.isArray(args[args.length - 1]) ? args.length - 1: args.length);
-	const last = args.length === first.length ? {} : args[args.length - 1];
+	const last: CallOptions = (args.length === first.length ? {} : args[args.length - 1]) as CallOptions;
+	last.to = this.target;
 	return await this.readView(v.selector, last);
       };
     });
