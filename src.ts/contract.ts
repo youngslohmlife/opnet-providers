@@ -1,8 +1,13 @@
-import { ABICoder } from "@btc-vision/bsi-binary";
+import { BytesWriter, ABICoder } from "@btc-vision/bsi-binary";
 import { Blockchain } from "opnet-unit-test/src/blockchain/Blockchain";
 import { CallResponse } from "opnet-unit-test/src/opnet/modules/ContractRunner";
 
+
 const coder = new ABICoder();
+
+export type ContractParameter = string | bigint | number;
+
+export type ContractMethod = (...args: ContractParameter[], options: CallOptions?) => CallResponse;
 
 export interface CallOptions {
   sender: string;
@@ -23,9 +28,9 @@ export class BlockchainProvider {
   }
   async readView(selector: string, opts?: CallOptions): ArrayBuffer {
     return await this.blockchain.readView(selector, this.address, this.address);
-  },
+  }
   async readMethod(selector: string, data: ArrayBuffer, opts?: CallOptions): ArrayBuffer {
-    return await this.blockchain.readMethod(selector, Buffer.from(Array.from(Uint8Array.from(data))), opts && opts.sender || this.address, opts && opts.from || this.address);
+    return await this.blockchain.readMethod(selector, Buffer.from(Array.from(new Uint8Array(data))), opts && opts.sender || this.address, opts && opts.from || this.address);
   }
 }
 
@@ -40,8 +45,12 @@ const ln = (v) => ((console.log(v)), v);
 
 export class Contract {
   public target: string;
-  public fns: Array<Fragment>,
+  public fns: Array<IFragment>;
   public provider: IProviderOrSigner;
+  public callStatic: {
+    [key: string]: ContractMethod
+  };
+  [key: string]: any;
   static toFragment(s: string): IFragment {
     const firstParen = s.indexOf('(');
     const name = s.substr(0, firstParen);
@@ -59,12 +68,29 @@ export class Contract {
     this.provider = provider;
     this.fns = Contract.toFragments(fns);
     this.target = address;
+    this.callStatic = {};
     this.fns.forEach((v: IFragment) => {
       this[v.name] = async (...args) => {
         const first = args.slice(0, typeof args[args.length - 1] === 'object' && !Array.isArray(args[args.length - 1]) ? args.length - 1: args.length);
-	const last = args[args.length - 1];
-	
+	const last = args.length === first.length ? {} : args[args.length - 1];
+	const writer = new BytesWriter();
+	v.parameters.forEach((v, i) => {
+          switch (v) {
+            case 'Address':
+              writer.writeAddress(args[i]);
+	      break;
+	    default:
+              writer.writeU256(args[i]);
+	      break;
+          }
+        });
+	return await this.readMethod(v.selector, writer.getBuffer(), last);
       };
-    })
+      this.callStatic[v.name] = async (...args) => {
+        const first = args.slice(0, typeof args[args.length - 1] === 'object' && !Array.isArray(args[args.length - 1]) ? args.length - 1: args.length);
+	const last = args.length === first.length ? {} : args[args.length - 1];
+	return await this.readView(v.selector, last);
+      };
+    });
   }
 }
