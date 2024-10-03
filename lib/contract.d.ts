@@ -1,4 +1,6 @@
 import { Blockchain } from "opnet-unit-test/build/blockchain/Blockchain.js";
+import { ContractRuntime } from "opnet-unit-test/build/opnet/modules/ContractRuntime.js";
+export * from "opnet-unit-test/build/opnet/modules/GetBytecode.js";
 export type BlockchainBase = typeof Blockchain;
 export type ContractParameter = string | bigint | number;
 export type ContractMethod = (...args: (ContractParameter | CallOptions)[]) => any;
@@ -10,6 +12,7 @@ export interface CallOptions {
 export interface IProviderOrSigner {
     readView(selector: string, opts: CallOptions): Promise<ArrayBuffer>;
     readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
+    getAddress(): string;
 }
 export interface ContractImpl {
     readMethod(selector: string, calldata: Buffer, sender: string, from: string): Promise<ArrayBuffer>;
@@ -20,6 +23,7 @@ export declare class BlockchainProvider {
     blockchain: typeof Blockchain;
     address: string;
     constructor(address: string, blockchain: typeof Blockchain);
+    getAddress(): string;
     readView(selector: string, opts: CallOptions): Promise<ArrayBuffer>;
     readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
 }
@@ -29,7 +33,7 @@ export interface IFragment {
     returnType: string;
     selector: string;
 }
-export declare class Contract {
+export declare class Contract extends ContractRuntime {
     target: string;
     fns: Array<IFragment>;
     provider: IProviderOrSigner;

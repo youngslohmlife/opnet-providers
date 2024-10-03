@@ -1,6 +1,8 @@
 import { BinaryWriter, ABICoder } from "@btc-vision/bsi-binary";
 import { Blockchain } from "opnet-unit-test/build/blockchain/Blockchain.js";
-import { CallResponse } from "opnet-unit-test/build/opnet/modules/ContractRuntime.js";
+import { ContractRuntime, CallResponse } from "opnet-unit-test/build/opnet/modules/ContractRuntime.js";
+
+export * from "opnet-unit-test/build/opnet/modules/GetBytecode.js";
 
 export type BlockchainBase = typeof Blockchain;
 
@@ -19,6 +21,7 @@ export interface CallOptions {
 export interface IProviderOrSigner {
   readView(selector: string, opts: CallOptions): Promise<ArrayBuffer>;
   readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
+  getAddress(): string;
 }
 
 export interface ContractImpl {
@@ -37,6 +40,9 @@ export class BlockchainProvider {
     this.address = address;
     this.blockchain = blockchain;
   }
+  getAddress(): string {
+    return this.address;
+  }
   async readView(selector: string, opts: CallOptions): Promise<ArrayBuffer> {
     return await getContract(this.blockchain, opts.to).readView(selector, this.address, this.address);
   }
@@ -54,7 +60,7 @@ export interface IFragment {
 
 const ln = (v) => ((console.log(v)), v);
 
-export class Contract {
+export class Contract extends ContractRuntime {
   public target: string;
   public fns: Array<IFragment>;
   public provider: IProviderOrSigner;
@@ -66,19 +72,22 @@ export class Contract {
     const firstParen = s.indexOf('(');
     const name = s.substr(0, firstParen);
     const params = s.substr(firstParen + 1, s.lastIndexOf(')') - firstParen - 1).split(',').map((v) => v.trim());
-    return ln({
+    return {
       name,
       selector: coder.encodeSelector(name),
-      parameters: params
-    });
+      parameters: params,
+      returnType: 'void'
+    } as IFragment;
   }
   static toFragments(fns: Array<string>): Array<IFragment> {
     return fns.map((v) => Contract.toFragment(v));
   }
   constructor(address: string, fns: Array<string>, provider: IProviderOrSigner) {
+    super(address, provider.getAddress());
     this.provider = provider;
     this.fns = Contract.toFragments(fns);
     this.target = address;
+    this.address = address;
     this.callStatic = {};
     this.fns.forEach((v: IFragment) => {
       this[v.name] = async (...args) => {
@@ -96,13 +105,13 @@ export class Contract {
 	      break;
           }
         });
-	return await this.readMethod(v.selector, writer.getBuffer(), last);
+	return await this.provider.readMethod(v.selector, writer.getBuffer(), last);
       };
       this.callStatic[v.name] = async (...args) => {
         const first = args.slice(0, typeof args[args.length - 1] === 'object' && !Array.isArray(args[args.length - 1]) ? args.length - 1: args.length);
 	const last: CallOptions = (args.length === first.length ? {} : args[args.length - 1]) as CallOptions;
 	last.to = this.target;
-	return await this.readView(v.selector, last);
+	return await this.provider.readView(v.selector, last);
       };
     });
   }
