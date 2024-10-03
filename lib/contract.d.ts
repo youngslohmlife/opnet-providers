@@ -8,8 +8,8 @@ export interface CallOptions {
     to: string;
 }
 export interface IProviderOrSigner {
-    readView(selector: string, opts: CallOptions): ArrayBuffer;
-    readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): ArrayBuffer;
+    readView(selector: string, opts: CallOptions): Promise<ArrayBuffer>;
+    readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
 }
 export interface ContractImpl {
     readMethod(selector: string, calldata: Buffer, sender: string, from: string): Promise<ArrayBuffer>;

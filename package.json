@@ -4,6 +4,9 @@
   "description": "OP_NET provider classes for testing and live systems",
   "main": "lib/index.js",
   "type": "module",
+  "exports": {
+    ".": "./lib/index.js"
+  },
   "repository": "https://github.com/youngslohmlife/opnet-providers",
   "scripts": {
     "build": "tsc"
