@@ -68,17 +68,18 @@ export class Contract extends ContractRuntime {
     [key: string]: ContractMethod
   };
   [key: string]: any;
-  static toFragment(s: string): IFragment {
-    const firstParen = s.indexOf('(');
-    const name = s.substr(0, firstParen);
-    const params = s.substr(firstParen + 1, s.lastIndexOf(')') - firstParen - 1).split(',').map((v) => v.trim());
+  static toFragment(s) {
+    const [fullSignature, returnType] = s.split(':').map(part => part.trim());
+    const firstParen = fullSignature.indexOf('(');
+    const name = fullSignature.substr(0, firstParen);
+    const params = fullSignature.substr(firstParen + 1, fullSignature.lastIndexOf(')') - firstParen - 1).split(',').map((v) => v.trim());
     return {
-      name,
-      selector: Number(`0x${coder.encodeSelector(name)}`,),
-      parameters: params,
-      returnType: 'void'
-    } as IFragment;
-  }
+        name,
+        selector: Number(`0x${coder.encodeSelector(name)}`),
+        parameters: params,
+        returnType: returnType || 'void'
+    };
+}
   static toFragments(fns: Array<string>): Array<IFragment> {
     return fns.map((v) => Contract.toFragment(v));
   }

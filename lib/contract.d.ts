@@ -41,7 +41,12 @@ export declare class Contract extends ContractRuntime {
         [key: string]: ContractMethod;
     };
     [key: string]: any;
-    static toFragment(s: string): IFragment;
+    static toFragment(s: any): {
+        name: any;
+        selector: number;
+        parameters: any;
+        returnType: any;
+    };
     static toFragments(fns: Array<string>): Array<IFragment>;
     constructor(address: string, fns: Array<string>, provider: IProviderOrSigner);
 }
