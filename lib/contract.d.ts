@@ -10,13 +10,13 @@ export interface CallOptions {
     to: string;
 }
 export interface IProviderOrSigner {
-    readView(selector: string, opts: CallOptions): Promise<ArrayBuffer>;
-    readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
+    readView(selector: number, opts: CallOptions): Promise<ArrayBuffer>;
+    readMethod(selector: number, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
     getAddress(): string;
 }
 export interface ContractImpl {
-    readMethod(selector: string, calldata: Buffer, sender: string, from: string): Promise<ArrayBuffer>;
-    readView(selector: string, sender: string, from: string): Promise<ArrayBuffer>;
+    readMethod(selector: number, calldata: Buffer, sender: string, from: string): Promise<ArrayBuffer>;
+    readView(selector: number, sender: string, from: string): Promise<ArrayBuffer>;
 }
 export declare function getContract(blockchain: BlockchainBase, who: string): ContractImpl;
 export declare class BlockchainProvider {
@@ -24,14 +24,14 @@ export declare class BlockchainProvider {
     address: string;
     constructor(address: string, blockchain: typeof Blockchain);
     getAddress(): string;
-    readView(selector: string, opts: CallOptions): Promise<ArrayBuffer>;
-    readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
+    readView(selector: number, opts: CallOptions): Promise<ArrayBuffer>;
+    readMethod(selector: number, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
 }
 export interface IFragment {
     name: string;
     parameters: Array<string>;
     returnType: string;
-    selector: string;
+    selector: number;
 }
 export declare class Contract extends ContractRuntime {
     target: string;

@@ -19,14 +19,14 @@ export interface CallOptions {
 }
 
 export interface IProviderOrSigner {
-  readView(selector: string, opts: CallOptions): Promise<ArrayBuffer>;
-  readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
+  readView(selector: number, opts: CallOptions): Promise<ArrayBuffer>;
+  readMethod(selector: number, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer>;
   getAddress(): string;
 }
 
 export interface ContractImpl {
-  readMethod(selector: string, calldata: Buffer, sender: string, from: string): Promise<ArrayBuffer>;
-  readView(selector: string, sender: string, from: string): Promise<ArrayBuffer>;
+  readMethod(selector: number, calldata: Buffer, sender: string, from: string): Promise<ArrayBuffer>;
+  readView(selector: number, sender: string, from: string): Promise<ArrayBuffer>;
 }
 
 export function getContract(blockchain: BlockchainBase, who: string): ContractImpl {
@@ -43,10 +43,10 @@ export class BlockchainProvider {
   getAddress(): string {
     return this.address;
   }
-  async readView(selector: string, opts: CallOptions): Promise<ArrayBuffer> {
+  async readView(selector: number, opts: CallOptions): Promise<ArrayBuffer> {
     return await getContract(this.blockchain, opts.to).readView(selector, this.address, this.address);
   }
-  async readMethod(selector: string, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer> {
+  async readMethod(selector: number, data: ArrayBuffer, opts: CallOptions): Promise<ArrayBuffer> {
     return await getContract(this.blockchain, opts.to).readMethod(selector, Buffer.from(Array.from(new Uint8Array(data))), opts && opts.sender || this.address, opts && opts.from || this.address);
   }
 }
@@ -55,7 +55,7 @@ export interface IFragment {
   name: string;
   parameters: Array<string>;
   returnType: string;
-  selector: string;
+  selector: number;
 }
 
 const ln = (v) => ((console.log(v)), v);
@@ -74,7 +74,7 @@ export class Contract extends ContractRuntime {
     const params = s.substr(firstParen + 1, s.lastIndexOf(')') - firstParen - 1).split(',').map((v) => v.trim());
     return {
       name,
-      selector: coder.encodeSelector(name),
+      selector: Number(`0x${coder.encodeSelector(name)}`,),
       parameters: params,
       returnType: 'void'
     } as IFragment;
