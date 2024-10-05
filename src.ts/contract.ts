@@ -1,6 +1,7 @@
 import { BinaryWriter, ABICoder } from "@btc-vision/bsi-binary";
 import { Blockchain } from "opnet-unit-test/build/blockchain/Blockchain.js";
 import { ContractRuntime, CallResponse } from "opnet-unit-test/build/opnet/modules/ContractRuntime.js";
+import { decodeResponse } from "./utils.js";
 
 export * from "opnet-unit-test/build/opnet/modules/GetBytecode.js";
 
@@ -106,7 +107,9 @@ export class Contract extends ContractRuntime {
 	      break;
           }
         });
-	return await this.provider.readMethod(v.selector, writer.getBuffer(), last);
+	const result = await this.provider.readMethod(v.selector, writer.getBuffer(), last);
+  const decoded = decodeResponse(result, v.returnType);
+  return decoded;
       };
       this.callStatic[v.name] = async (...args) => {
         const first = args.slice(0, typeof args[args.length - 1] === 'object' && !Array.isArray(args[args.length - 1]) ? args.length - 1: args.length);
