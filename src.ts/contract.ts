@@ -1,9 +1,13 @@
 import { BinaryWriter, ABICoder } from "@btc-vision/bsi-binary";
-import { Blockchain } from "opnet-unit-test/build/blockchain/Blockchain.js";
-import { ContractRuntime, CallResponse } from "opnet-unit-test/build/opnet/modules/ContractRuntime.js";
+import {
+  ContractRuntime,
+  CallResponse,
+  Blockchain,
+  BytecodeManager
+} from "opnet-unit-test";
 import { decodeResponse } from "./utils.js";
 
-export * from "opnet-unit-test/build/opnet/modules/GetBytecode.js";
+export { BytecodeManager };
 
 export type BlockchainBase = typeof Blockchain;
 

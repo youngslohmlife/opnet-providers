@@ -18,7 +18,7 @@
     "typescript": "^5.6.2"
   },
   "dependencies": {
-    "opnet-unit-test": "https://github.com/youngslohmlife/opnet-unit-test",
+    "opnet-unit-test": "github:youngslohmlife/opnet-unit-test",
     "wasmer": "https://github.com/btc-vision/opnet-unit-test"
   }
 }

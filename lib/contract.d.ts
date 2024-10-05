@@ -1,6 +1,5 @@
-import { Blockchain } from "opnet-unit-test/build/blockchain/Blockchain.js";
-import { ContractRuntime } from "opnet-unit-test/build/opnet/modules/ContractRuntime.js";
-export * from "opnet-unit-test/build/opnet/modules/GetBytecode.js";
+import { ContractRuntime, Blockchain, BytecodeManager } from "opnet-unit-test";
+export { BytecodeManager };
 export type BlockchainBase = typeof Blockchain;
 export type ContractParameter = string | bigint | number;
 export type ContractMethod = (...args: (ContractParameter | CallOptions)[]) => any;
