@@ -109,7 +109,8 @@ export class Contract extends ContractRuntime {
         });
 	const result = await this.provider.readMethod(v.selector, writer.getBuffer(), last);
   const decoded = decodeResponse(result, v.returnType);
-  return decoded;
+  result["response"] = decoded;
+  return result;
       };
       this.callStatic[v.name] = async (...args) => {
         const first = args.slice(0, typeof args[args.length - 1] === 'object' && !Array.isArray(args[args.length - 1]) ? args.length - 1: args.length);
