@@ -1,5 +1,17 @@
+import { u256 } from "as-bignum/assembly";
+import { MemorySlotPointer } from '@btc-vision/btc-runtime/runtime/memory/MemorySlotPointer';
 import { BinaryReader } from "@btc-vision/bsi-binary";
 
+export function fromArrayBuffer(data: ArrayBuffer): MemorySlotPointer {
+    if (data.byteLength === 0) return u256.Zero;
+    const result = u256.fromBytes(changetype<u8[]>(Uint8Array.wrap(data)));
+    return result;
+}
+
+
+export function b32decode(v: string): u256 {
+    return fromArrayBuffer(fromWords(_b32decode(v).words)) as u256;
+}
 
 export function decodeResponse(result: any, returnType: string): any {
     const response = result.response as Uint8Array;

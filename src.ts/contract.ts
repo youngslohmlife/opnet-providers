@@ -1,7 +1,6 @@
 import { BinaryWriter, ABICoder } from "@btc-vision/bsi-binary";
 import {
   ContractRuntime,
-  CallResponse,
   Blockchain,
   BytecodeManager
 } from "opnet-unit-test";
