@@ -20,8 +20,9 @@
   "dependencies": {
     "@btc-vision/btc-runtime": "https://github.com/btc-vision/btc-runtime",
     "@btc-vision/transaction": "https://github.com/btc-vision/transaction",
+    "@btc-vision/bsi-binary": "https://github.com/btc-vision/bsi-binary",
     "@btc-vision/op-vm": "https://github.com/btc-vision/op-vm",
-    "as-bignum": "^0.3.1",
-    "wasmer": "https://github.com/btc-vision/opnet-unit-test"
+    "as-bignum": "^0.3.0",
+    "opnet-unit-test": "https://github.com/btc-vision/opnet-unit-test"
   }
 }
